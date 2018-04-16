@@ -1,32 +1,40 @@
+
 $(function () {
     let stompClient;
     let roomId;
 
     function generateRoomId(id){
-        if (!id){
-            roomId = new Date().getTime();
-        } else {
+        if (id){
             roomId = id;
+        } else {
+            roomId = new Date().getTime();
         }
-        $("<p></p>").text("Chat name: " + roomId).prependTo("div.container");
+        $("<p></p>").text("Chat name: " + roomId).addClass("chatId").prependTo("div.container");
     }
 
     function connect() {
+        disconnect();
+        initSTOMP();
+        generateRoomId();
+        $("#inputDiv").show();
+    }
+
+    function initSTOMP(){
         let socket = new SockJS('/websocket');
         stompClient = Stomp.over(socket);
-        if (!roomId){
-            generateRoomId();
-        }
         stompClient.connect({}, function () {
             stompClient.subscribe('/topic/chat/' + roomId, showMessage);
         });
-        $("#inputDiv").show();
-        $("#createRoom").hide();
     }
 
     function disconnect() {
         if(stompClient != null) {
             stompClient.disconnect();
+            $(".chatId").remove();
+            $("#inputDiv").hide();
+            $("#mediaList").empty();
+            roomId = null;
+            stompClient = null;
         }
     }
 
@@ -51,8 +59,10 @@ $(function () {
     }
 
     function connectToChat() {
+        disconnect();
         generateRoomId($("#roomId").val());
-        connect();
+        initSTOMP();
+        $("#inputDiv").show();
     }
 
     $("#msgText").keypress(function (e) {
@@ -67,7 +77,9 @@ $(function () {
             connectToChat();
             $(this).val("");
         }
-    })
+    });
+
+    $("#exitButton").on("click", disconnect);
 
     $("#sendMessage").on("click", sendMessage);
 
