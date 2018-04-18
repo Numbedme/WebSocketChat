@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="css/bootstrap.min.css" th:href="@{/static/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<body>
+<div id="main" class="container">
+    <app-accordion></app-accordion>
+    <chat></chat>
+</div>
+<script src="js/sockjs.min.js" th:src="@{/static/js/sockjs.min.js}"></script>
+<script src="js/stomp.min.js" th:src="@{/static/js/stomp.min.js}"></script>
+<script src="js/jquery.min.js" th:src="@{/static/js/jquery.min.js}"></script>
+<script src="js/bootstrap.min.js" th:src="@{/static/js/bootstrap.min.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="js/vue.js"></script>
+</body>
+</html>
