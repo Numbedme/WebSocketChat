@@ -1,6 +1,7 @@
 package com.numbedme.chat.controller;
 
 
+import com.numbedme.chat.entity.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -22,14 +23,14 @@ public class MessagingController {
     }
 
     @MessageMapping("/message/{roomId}")
-    public void onRecieveMessageWithId(String message, @DestinationVariable String roomId){
-        console.info(message);
+    public void onRecieveMessageWithId(Message message, @DestinationVariable String roomId){
+        console.info(message.toString());
         this.template.convertAndSend("/topic/chat/" + roomId, message);
     }
 
     @MessageMapping("/message")
-    public void onRecieveMessage(String message){
-        console.info(message);
+    public void onRecieveMessage(Message message){
+        console.info(message.toString());
         this.template.convertAndSend("/topic/local", message);
     }
 }
