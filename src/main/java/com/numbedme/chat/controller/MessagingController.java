@@ -14,7 +14,7 @@ public class MessagingController {
 
     private final SimpMessagingTemplate template;
 
-    private Logger conosle = Logger.getLogger(MessagingController.class.getCanonicalName());
+    private Logger console = Logger.getLogger(MessagingController.class.getCanonicalName());
 
     @Autowired
     public MessagingController(SimpMessagingTemplate template) {
@@ -23,13 +23,13 @@ public class MessagingController {
 
     @MessageMapping("/message/{roomId}")
     public void onRecieveMessageWithId(String message, @DestinationVariable String roomId){
-        conosle.info(message);
+        console.info(message);
         this.template.convertAndSend("/topic/chat/" + roomId, message);
     }
 
     @MessageMapping("/message")
     public void onRecieveMessage(String message){
-        conosle.info(message);
+        console.info(message);
         this.template.convertAndSend("/topic/local", message);
     }
 }

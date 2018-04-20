@@ -67,7 +67,6 @@ Vue.component('chat', {
             <div class="form-group" id="inputDiv">
                 <input @keyup.enter="submitMessage" type="text" id="msgText" placeholder="Write a message..." class="form-control" v-model="messageText"/>
                 <button id="submitMessage" class="btn-primary" @click="submitMessage">Send</button>
-                <p>HERE</p>
             </div>
             <posts v-bind:messages="messages"></posts>
         </div>`,
@@ -81,7 +80,10 @@ Vue.component('chat', {
     },
     methods: {
         submitMessage: function () {
-            this.stompClient.send("/app/message", {}, this.messageText);
+            if (this.messageText !== ""){
+                this.stompClient.send("/app/message", {}, this.messageText);
+                this.messageText = "";
+            }
         },
         connect: function () {
             if (!this.connected){
@@ -102,7 +104,8 @@ Vue.component('chat', {
         },
         showMessage: function (message) {
             let msg = {id: 0, text: message.body};
-            this.messages.push(msg);
+            this.messages.unshift(msg);
+            new Audio("../assets/message.mp3").play();
         }
     },
     created:function () {
