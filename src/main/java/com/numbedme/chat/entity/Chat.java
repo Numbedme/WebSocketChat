@@ -9,13 +9,17 @@ import java.util.List;
 @Data
 public class Chat {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
 
     @OneToMany
     private List<User> users;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Message> messages;
+
+    public void addMessage(Message msg){
+        messages.add(msg);
+    }
 }

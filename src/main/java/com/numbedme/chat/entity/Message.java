@@ -9,8 +9,11 @@ import java.util.Date;
 @Entity
 public class Message {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
+    @Lob
     private String message;
     private Date date;
+    @ManyToOne
+    private User user;
 }

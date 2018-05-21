@@ -4,7 +4,7 @@ class User {
     constructor(id, login){
         let rnd = Math.floor(Math.random() * (5-1)) + 1;
         this.id = id;
-        this.login = login + rnd;
+        this.login = login;
         this.image = images[rnd];
     }
 }
@@ -18,7 +18,111 @@ class Message {
     }
 }
 
+Vue.component('navigation-bar', {
+    template:`<nav class="sidenav">
+                  <a class="navbar-brand">Hello, {{$root.user.login}}</a>
+                  <a class="nav-link active" href="#" data-toggle="modal" data-target="#modalRegistry">Change name</a>
+                  <a class="nav-link" href="#" data-toggle="modal" data-target="#modalChat">Create chat</a>
+              </nav>`,
+    data:function () {
+        return {
+            user: this.$root.user
+        }
+    }
+});
+
+Vue.component('modal-registry', {
+   template: `<div class="modal fade" id="modalRegistry" tabindex="-1" role="dialog" aria-labelledby="modalRegistryLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="modalRegistryLabel">Register user</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                              <div class="form-group">
+                                <label for="user-name" class="col-form-label">Enter username:</label>
+                                <input type="text" class="form-control" id="user-name" placeholder="Username..." v-model="inputText">
+                              </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" @click="submit">Register</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>`,
+    data:function(){
+       return {
+           inputText: ""
+       }
+    },
+    methods:{
+       submit: function () {
+           let self = this;
+           let user = new User(null, this.inputText);
+           $.ajax({
+               url: this.$root.postUserURL,
+               type:"POST",
+               data: JSON.stringify(user),
+               contentType: "application/json; charset=utf-8",
+               success: function (data) {
+                   self.$root.user = data;
+               },
+               error: function (data) {
+                   alert(JSON.parse(data));
+               }
+           })
+       }
+    }
+});
+
+Vue.component('modal-chat', {
+    template: `<div class="modal fade" id="modalChat" tabindex="-1" role="dialog" aria-labelledby="modalChatLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="modalChatLabel">Register new chat</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                          <div class="modal-body">
+                              <div class="form-group">
+                                <label for="chat-name" class="col-form-label">Chat name:</label>
+                                <input type="text" class="form-control" id="chat-name">
+                              </div>
+                              <div class="form-group">
+                                <label for="chat-pass" class="col-form-label">Chat password:</label>
+                                <input type="password" class="form-control" id="chat-pass">
+                                <small><i>Leave empty for public chat</i></small>
+                              </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Register</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>`
+});
+
 Vue.component('posts', {
+    template:
+        `<div id="mediaList" class="list-unstyled">
+            <template v-for="msg in messages">
+                <post v-bind:message="msg"></post>
+                <br/>
+            </template>
+            <br/>
+        </div>`,
+    props: ['messages']
+});
+
+
+Vue.component('post', {
     data: function () {
         return {
             options: {
@@ -28,64 +132,117 @@ Vue.component('posts', {
                 hour: 'numeric',
                 minute: 'numeric',
                 second: 'numeric'
+            },
+            user: new User(-1,"")
+        }
+    },
+    template: `<div class="media">
+                    <img class="align-self-center mr-3 ml-3" v-bind:src="user.image" v-if="!isCurrentUser()"/>
+                    <div class="media-body rounded" v-bind:class="defineClass">
+                        <h3 class="font-weight-light">{{user.login}}</h3>
+                            <span class="text-center">{{message.message}}</span>
+                        <br/>
+                        <small><i>Posted on {{message.date | dateFilter}}</i></small>
+                    </div>
+                    <img class="align-self-center ml-3 mr-3" v-bind:src="user.image" v-if="isCurrentUser()"/>
+                </div>`,
+    computed:{
+        defineClass:function () {
+            return {
+                'media-background-self': this.isCurrentUser(),
+                'media-background-else': !this.isCurrentUser()
             }
         }
     },
-    template:
-        `<ul id="mediaList" class="list-unstyled">
-            <template v-for="msg in messages">
-                <li class="media">
-                    <img class="align-self-center mr-3" v-bind:src="msg.user.image"/>
-                    <div class="media-body" style="width: 200rem word-wrap: break-word;">
-                        <h3 class="font-weight-light">{{msg.user.login}}</h3>
-                            <span class="text-center">{{msg.message}}</span>
-                        <br/>
-                        <small><i>Posted on {{msg.date | dateFilter}}</i></small>
-                    </div>
-                </li>
-            </template>
-        </ul>`,
-    props: ['messages'],
+    watch:{
+        message:function () {
+            this.init();
+        }
+    },
+    props: ['message'],
     filters: {
         dateFilter: function (date) {
             return new Date(date).toLocaleString("en-US", this.options);
         }
+    },
+    methods: {
+        init: function () {
+            let self = this;
+            $.get(this.message._links.user.href, function (data) {
+                self.user = data;
+            })
+        },
+        isCurrentUser:function(){
+            return this.$root.user.login === this.user.login;
+        }
+    },
+    created:function () {
+        this.init();
     }
-});
+})
 
 Vue.component('chat', {
     template:
         `<div id="chat">
-            <div class="form-group" id="inputDiv">
-                <input @keyup.enter="submitMessage" type="text" id="msgText" placeholder="Write a message..." class="form-control" v-model="inputText"/>
-                <button id="submitMessage" class="btn-primary" @click="submitMessage">Send</button>
-            </div>
             <posts v-bind:messages="messages"></posts>
+            <div class="input-group" id="inputDiv">
+                <input @keyup.enter="submitMessage" type="text" id="msgText" placeholder="Write a message..." class="form-control" v-model="inputText"/>
+                <div class="input-group-append">
+                    <button id="submitMessage" class="btn btn-primary" @click="submitMessage">Send</button>
+                </div>
+            </div>
         </div>`,
     data: function () {
         return {
             inputText: "",
             messages:[],
-            stompClient: null,
+            chat: null,
+            stompClient: Stomp.over(new SockJS(this.$root.socketEndpoint)),
             connected: false,
-            user: new User(0, "NoName")
+            defaultChatName:"Global"
         }
     },
     methods: {
         submitMessage: function () {
             if (this.inputText !== ""){
-                let msg = JSON.stringify(new Message(0, this.user, this.inputText, new Date()));
-                this.stompClient.send("/app/message", {}, msg);
+                let msg = JSON.stringify(new Message(null, this.$root.user, this.inputText, new Date()));
+                this.stompClient.send(`${this.$root.targetURL}${this.chat.name}`, {}, msg);
                 this.inputText = "";
             }
         },
-        connect: function () {
-            if (!this.connected){
+        getChat: function (name) {
+            let self = this;
+            this.stompClient.connect({}, function () {
+                $.get(`${self.$root.chatAjaxGetURL}${name}`, function (data) {
+                    self.chat = data;
+                    self.stompClient.subscribe(`${self.$root.subscribeURL}${self.chat.name}`, self.showMessage);
+                    $.get(self.chat._links.messages.href, function (data) {
+                        self.messages = data._embedded.messages;
+                        self.messages.sort(function (a,b) {
+                            return new Date(b.date) - new Date(a.date);
+                        });
+                        self.connected = true;
+                    });
+                });
+            });
+        },
+        updateChat: function () {
+            let self = this;
+            $.get(self.chat._links.messages.href, function (data) {
+                self.messages = data._embedded.messages;
+                self.messages.sort(function (a,b) {
+                    return new Date(b.date) - new Date(a.date);
+                });
+            });
+        },
+        subscribe:function () {
+            console.log("Here");
+        },
+        connect: function (name) {
+            if (this.connected){
                 this.disconnect();
             }
-            this.stompClient = Stomp.over(new SockJS('/websocket'));
-            this.stompClient.connect({}, this.subscribe);
-            this.connected = true;
+            this.getChat(name);
         },
         disconnect: function () {
             if (this.stompClient != null){
@@ -93,25 +250,35 @@ Vue.component('chat', {
                 this.connected = false;
             }
         },
-        subscribe: function () {
-            this.stompClient.subscribe('/topic/local', this.showMessage);
-        },
         showMessage: function (message) {
-            let msg = JSON.parse(message.body);
-            this.messages.unshift(msg);
+            console.log(message);
+            this.updateChat();
             new Audio("../assets/message.mp3").play();
         }
     },
     created:function () {
-        this.connect();
+        this.connect(this.defaultChatName);
     }
 });
 
 var app = new Vue({
-    el: '#main',
+    template:`<div>
+                <navigation-bar></navigation-bar>
+                <div class="main container row justify-content-md-center">
+                    <div class="col-md-8">
+                        <chat></chat>
+                    </div>
+                </div>
+                <modal-registry></modal-registry>
+                <modal-chat></modal-chat>
+             </div>`,
+    el: '#app',
     data:{
         socketEndpoint: '/websocket',
-        targetURL: '/app/message',
-        subscribeURL:'/topic/chat'
+        targetURL: '/app/message/',
+        subscribeURL:'/topic/chat/',
+        chatAjaxGetURL: '/rest/chats/search/findByName?name=',
+        postUserURL: "/rest/users",
+        user: new User(1, "NoName")
     }
 });
