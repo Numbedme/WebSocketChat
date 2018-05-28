@@ -8,6 +8,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
 @Controller
@@ -23,7 +24,7 @@ public class MessagingController {
     }
 
     @MessageMapping("/message/{chatName}")
-    public void onRecieveMessage(Message message, @DestinationVariable String chatName){
+    public void onRecieveMessage(Message message, @DestinationVariable String chatName) throws IOException {
         logger.info(message.toString());
         messageService.addMessageToChat(chatName, message);
     }

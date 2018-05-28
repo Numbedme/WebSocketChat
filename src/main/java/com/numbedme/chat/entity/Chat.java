@@ -12,8 +12,9 @@ public class Chat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private String password;
 
-    @OneToMany
+    @ManyToMany
     private List<User> users;
 
     @OneToMany(fetch = FetchType.EAGER)

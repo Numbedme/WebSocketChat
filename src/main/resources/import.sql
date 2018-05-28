@@ -1,5 +1,13 @@
-INSERT INTO USER (id, image, login) VALUES (1, '../assets/1.png', 'NoName');
-INSERT INTO MESSAGE (id, date, message, user_id) VALUES (1, SYSDATE, 'Hello World!', 1);
-INSERT INTO CHAT (id, name) VALUES (1, 'Global');
+INSERT INTO IMAGE (id, name, type, bytes) VALUES (1, '1', 'png', FILE_READ('C:\git\SocketChat\src\main\resources\static\assets\1.png'));
+INSERT INTO IMAGE (id, name, type, bytes) VALUES (2, '2', 'png', FILE_READ('C:\git\SocketChat\src\main\resources\static\assets\2.png'));
+INSERT INTO IMAGE (id, name, type, bytes) VALUES (3, '3', 'png', FILE_READ('C:\git\SocketChat\src\main\resources\static\assets\3.png'));
+INSERT INTO IMAGE (id, name, type, bytes) VALUES (4, '4', 'png', FILE_READ('C:\git\SocketChat\src\main\resources\static\assets\4.png'));
+INSERT INTO IMAGE (id, name, type, bytes) VALUES (5, '5', 'png', FILE_READ('C:\git\SocketChat\src\main\resources\static\assets\5.png'));
+INSERT INTO IMAGE (id, name, type, bytes) VALUES (6, '6', 'png', FILE_READ('C:\git\SocketChat\src\main\resources\static\assets\6.png'));
+INSERT INTO IMAGE (id, name, type, bytes) VALUES (7, '7', 'png', FILE_READ('C:\git\SocketChat\src\main\resources\static\assets\7.png'));
+INSERT INTO USER (id, image_name, login) VALUES (1, 1, 'NoName');
+INSERT INTO MESSAGE (id, date, message, user_id, 	MESSAGE_TYPE) VALUES (1, SYSDATE, 'Hello World!', 1, 'TEXT');
+INSERT INTO CHAT (id, name, password) VALUES (1, 'Global', '');
+INSERT INTO CHAT (id, name, password) VALUES (2, 'Test', '');
 INSERT INTO CHAT_MESSAGES (chat_id, messages_id) VALUES (1, 1);
 INSERT INTO CHAT_USERS (chat_id, users_id) VALUES (1, 1);
